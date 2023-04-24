@@ -361,7 +361,9 @@ class WhisperFeatureExtractor(SequenceFeatureExtractor):
             padded_inputs["attention_mask"] = padded_inputs["attention_mask"][:, :: self.hop_length]
 
         if return_tensors is not None:
-            padded_inputs = padded_inputs.convert_to_tensors(return_tensors)
+            dtype = kwargs.get("dtype", None)
+            device = kwargs.get("device", None)
+            padded_inputs = padded_inputs.convert_to_tensors(return_tensors, dtype=dtype, device=device)
 
         return padded_inputs
 

@@ -72,9 +72,9 @@ class BatchFeature(UserDict):
             initialization.
     """
 
-    def __init__(self, data: Optional[Dict[str, Any]] = None, tensor_type: Union[None, str, TensorType] = None):
+    def __init__(self, data: Optional[Dict[str, Any]] = None, tensor_type: Union[None, str, TensorType] = None, **kwargs):
         super().__init__(data)
-        self.convert_to_tensors(tensor_type=tensor_type)
+        self.convert_to_tensors(tensor_type=tensor_type, kwargs)
 
     def __getitem__(self, item: str) -> Union[Any]:
         """
@@ -111,7 +111,7 @@ class BatchFeature(UserDict):
     def items(self):
         return self.data.items()
 
-    def convert_to_tensors(self, tensor_type: Optional[Union[str, TensorType]] = None):
+    def convert_to_tensors(self, tensor_type: Optional[Union[str, TensorType]] = None, **kwparams):
         """
         Convert the inner content to tensors.
 
@@ -142,10 +142,13 @@ class BatchFeature(UserDict):
                 raise ImportError("Unable to convert output to PyTorch tensors format, PyTorch is not installed.")
             import torch  # noqa
 
+            dtype = kwargs.get("dtype", None)
+            device = kwargs.get("device", None)
+
             def as_tensor(value):
                 if isinstance(value, (list, tuple)) and len(value) > 0 and isinstance(value[0], np.ndarray):
                     value = np.array(value)
-                return torch.tensor(value)
+                return torch.tensor(value, dtype=dtype, device=device)
 
             is_tensor = torch.is_tensor
         elif tensor_type == TensorType.JAX:
